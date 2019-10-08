@@ -6,8 +6,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const passport = require("passport");
 
-const auth = require('./routes/auth');
-
 // Setting up port
 const connUri = process.env.MONGO_LOCAL_CONN_URL;
 let PORT = process.env.PORT || 3000;
@@ -23,13 +21,12 @@ app.use(passport.initialize());
 require("./middleware/jwt")(passport);
 
 //Configure Routes
-app = initializeRoutes(app);
+require('./routes/index')(app);
 
 // start the server
 app.listen(PORT, () => console.log('Server running on http://localhost:'+PORT+'/'));
 
 //=== HELPER METHODS BELOW
-
 
 //HELPERS
 function createApp(){
@@ -39,16 +36,6 @@ function createApp(){
     app.use(cors());
     app.use(bodyParser.urlencoded({ extended: false })); // initialize body-parser to parse incoming parameters requests to req.body
     app.use(bodyParser.json());
-
-    return app;
-}
-
-function initializeRoutes(app){
-    app.get('/', (req, res) => {
-        res.status(200).send({ message: "Welcome to the AUTddsHENTICATION API. Register or Login to test Authentication."});
-    });
-
-    app.use('/api/auth', auth);
 
     return app;
 }

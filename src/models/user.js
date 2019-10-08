@@ -28,7 +28,25 @@ const UserSchema = new mongoose.Schema({
         max: 100
     },
 
-    about: {
+    username: {
+        type: String,
+        required: false,
+        max: 100
+    },
+
+    role: {
+        type: String,
+        required: false,
+        max: 100
+    },
+
+    department: {
+        type: String,
+        required: false,
+        max: 100
+    },
+
+    bio: {
         type: String,
         required: false,
         max: 255
@@ -41,6 +59,9 @@ const UserSchema = new mongoose.Schema({
     },
 }, {timestamps: true});
 
+
+// const [gender, setGender] = useState("");
+// const [dob, setDOB] = useState("");//(dp)
 
 UserSchema.pre('save',  function(next) {
     const user = this;

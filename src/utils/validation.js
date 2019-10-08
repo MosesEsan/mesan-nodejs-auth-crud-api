@@ -2,7 +2,7 @@ function validateInput(body, register = false) {
     let fields = {"email": "email address", "password": "password"};
 
     if (register) {
-        fields["firstName"] = "firstName name";
+        fields["firstName"] = "first name";
         fields["lastName"] = "last name";
     }
 

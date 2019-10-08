@@ -9,11 +9,12 @@ exports.register = (req, res) => {
     let {error, success} = validation(req.body, true);
 
     // Check validation
-    if (!success)
+    if (!success){
         return res.status(400).json({
             success: false,
             error: {errorObj: error, message: "Please fill in all required fields."}
         });
+    }
 
     User.findOne({email: req.body.email})
         .then(user => {
@@ -23,11 +24,7 @@ exports.register = (req, res) => {
                     error: {message: 'Authentication failed. User already exists.'}
                 });
             } else {
-                const newUser = new User({
-                    name: req.body.name,
-                    email: req.body.email,
-                    password: req.body.password
-                });
+                const newUser = new User(req.body);
 
                 newUser.save()
                     .then(user => {
@@ -36,7 +33,11 @@ exports.register = (req, res) => {
                         res.status(200).send({success: true, token: token, user: user});
                     })
                     .catch(err => {
-                        return res.status(500).json({success: false, error: {message: 'Server Error'}});
+                        console.log(err)
+                        let message = 'Server Error';
+                        if (err.code === 11000) message = "This email address is linked to another account.";
+
+                        return res.status(500).json({success: false, error: {message}});
                     });
             }
         })
