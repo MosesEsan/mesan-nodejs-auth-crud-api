@@ -15,7 +15,7 @@ function authenticateJwt(req, res, next) {
     passport.authenticate('jwt', function(err, user, info) {
         if (err) return next(err);
 
-        if (!user) res.status(401).json({success: false, error: {message: "Unauthorized Access - No Token Provided!"}});
+        if (!user) res.status(401).json({message: "Unauthorized Access - No Token Provided!"});
         req.user = user;
         next();
 

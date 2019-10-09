@@ -4,7 +4,7 @@ const router = express.Router();
 const User = require('../controllers/users');
 
 router.route('/').get(User.index); //fetch all users
-router.route('/update').get(User.update); //fetch all users
+router.put('/update', User.update);
 
 // router.route('/:id')
 //     .get(User.show) //fetch user
