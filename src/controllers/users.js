@@ -1,16 +1,9 @@
 const User = require('../models/user');
-
-
-const regRules = {
-    'name': 'required',
-    'email': 'required|email',
-    'password': 'required|min:6',
-};
+const cloudinary = require('../config/cloudinary');
 
 //get all Users
 exports.index = function (req, res) {
-    console.log("we" +
-        "")
+    console.log("we")
 }
 
 //Read
@@ -30,16 +23,52 @@ exports.show = function (req, res) {
 //Update
 exports.update = function (req, res, info) {
     const {id} = req.user;
-    const update = {...req.body};
+    let update = {...req.body};
 
-    User.findByIdAndUpdate(id, {$set: update}, {new: true})
-        .then(user => {
-            res.status(200).send({success: true, user})
-        })
-        .catch((error) => {
-            res.status(500).json({message: error.message})
+    if (req.file) {
+        let image = req.file.path;
+        cloudinary.uploader.upload(image, (error, result) => {
+            if (error) res.status(500).json({message: error.message})
+
+            console.log(result)
+
+            update = {...update, profileImage:result.url};
+            console.log(update)
+
+            User.findByIdAndUpdate(id, {$set: update}, {new: true})
+                .then(user =>  res.status(200).send({success: true, user}))
+                .catch((error) => res.status(500).json({message: error.message}));
         });
+    }else {
+        User.findByIdAndUpdate(id, {$set: update}, {new: true})
+            .then(user =>  res.status(200).send({success: true, user}))
+            .catch((error) => res.status(500).json({message: error.message}));
+    }
 };
+
+//Update
+exports.upload = function (req, res) {
+    console.log("in here")
+
+    const {id} = req.user;
+    const image = req.files[0];
+
+    console.log(image['path'])
+
+    cloudinary.uploader.upload(image['path'], (error, result) => {
+        console.log(result)
+        const update = {profileImage:result.url};
+
+        User.findByIdAndUpdate(id, {$set: update}, {new: true})
+            .then(user => {
+                res.status(200).send({success: true, user})
+            })
+            .catch((error) => {
+                res.status(500).json({message: error.message})
+            });
+    });
+};
+
 
 //Delete
 exports.destroy = function (req, res) {

@@ -12,16 +12,16 @@ exports.register = (req, res) => {
     if (!success){
         return res.status(400).json({
             success: false,
-            error: {errorObj: error, message: "Please fill in all required fields."}
+            error,
+            message: "Please fill in all required fields."
         });
     }
-
     User.findOne({email: req.body.email})
         .then(user => {
             if (user) {
                 return res.status(401).json({
                     success: false,
-                    error: {message: 'Authentication failed. User already exists.'}
+                    message: 'Authentication failed. User already exists.'
                 });
             } else {
                 const newUser = new User(req.body);
@@ -33,16 +33,15 @@ exports.register = (req, res) => {
                         res.status(200).send({success: true, token: token, user: user});
                     })
                     .catch(err => {
-                        console.log(err)
-                        let message = 'Server Error';
+                        let message = err.message;
                         if (err.code === 11000) message = "This email address is linked to another account.";
 
-                        return res.status(500).json({success: false, error: {message}});
+                        return res.status(500).json({success: false, message});
                     });
             }
         })
         .catch(err => {
-            return res.status(500).json({success: false, error: err});
+            return res.status(500).json({success: false, message:err.message});
         });
 };
 
@@ -57,23 +56,23 @@ exports.login = (req, res) => {
     if (!success)
         return res.status(400).json({
             success: false,
-            error: {errorObj: error, message: "Please fill in all required fields."}
+             error, message: "Please fill in all required fields."
         });
 
     User.findOne({email: req.body.email})
         .then(user => {
             if (!user)
-                return res.status(401).json({success: false, error: 'Authentication failed. User not found.'});
+                return res.status(401).json({success: false, message:'Authentication failed. User not found.'});
 
             //validate password
             if (!user.comparePassword(req.body.password))
-                return res.status(401).send({success: false, error: 'Authentication failed. Wrong password.'});
+                return res.status(401).send({success: false, message:'Authentication failed. Wrong password.'});
 
             const token = user.generateJWT();
             res.status(200).send({success: true, token: token, user: user});
         })
         .catch(err => {
-            return res.status(500).json({success: false, error: err});
+            return res.status(500).json({success: false, message:err.message});
         });
 };
 
