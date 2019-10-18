@@ -30,10 +30,7 @@ exports.update = function (req, res, info) {
         cloudinary.uploader.upload(image, (error, result) => {
             if (error) res.status(500).json({message: error.message})
 
-            console.log(result)
-
             update = {...update, profileImage:result.url};
-            console.log(update)
 
             User.findByIdAndUpdate(id, {$set: update}, {new: true})
                 .then(user =>  res.status(200).send({success: true, user}))
