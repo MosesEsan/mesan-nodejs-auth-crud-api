@@ -1,82 +1,47 @@
 const User = require('../models/user');
 const cloudinary = require('../config/cloudinary');
 
-//get all Users
-exports.index = function (req, res) {
-    console.log("we")
-}
+//Update
+exports.index = function (req, res, info) {
+    const {id} = req.user;
 
-//Read
-exports.show = function (req, res) {
-    const {id} = req.params;
-
-    User.forge({id})
-        .fetch()
+    return User.findById(id)
         .then((user) => {
-            if (!user) res.status(404).json({success: false, error: {message: "User does not exist!"}});
+            if (!user) return res.status(400).json({message: "User not found"});
 
-            res.status(200).json({success: true, data: {user}});
-        })
-        .catch((error) => res.status(500).json({message: error.message}));
-}
+            res.status(200).json({token: user.generateJWT(), user: user});
+        });
+};
 
 //Update
-exports.update = function (req, res, info) {
-    const {id} = req.user;
-    let update = {...req.body};
+exports.update = function (req, res) {
+    if (req.file) upload(req, res);
+    else {
+        console.log("no file in the bosdy!");
 
-    if (req.file) {
-        let image = req.file.path;
-        cloudinary.uploader.upload(image, (error, result) => {
-            if (error) res.status(500).json({message: error.message})
+        const {id} = req.user;
+        let update = {...req.body};
 
-            update = {...update, profileImage:result.url};
-
-            User.findByIdAndUpdate(id, {$set: update}, {new: true})
-                .then(user =>  res.status(200).send({success: true, user}))
-                .catch((error) => res.status(500).json({message: error.message}));
-        });
-    }else {
         User.findByIdAndUpdate(id, {$set: update}, {new: true})
-            .then(user =>  res.status(200).send({success: true, user}))
+            .then(user =>  res.status(200).json({user}))
             .catch((error) => res.status(500).json({message: error.message}));
     }
 };
 
-//Update
-exports.upload = function (req, res) {
-    console.log("in here")
-
+//Upload
+const upload = function (req, res) {
+    console.log("I was called")
     const {id} = req.user;
-    const image = req.files[0];
+    let update = {...req.body};
 
-    console.log(image['path'])
+    let image = req.file.path;
+    cloudinary.uploader.upload(image, (error, result) => {
+        if (error) return res.status(500).json({message: error.message});
 
-    cloudinary.uploader.upload(image['path'], (error, result) => {
-        console.log(result)
-        const update = {profileImage:result.url};
+        update = {...update, profileImage:result.url};
 
         User.findByIdAndUpdate(id, {$set: update}, {new: true})
-            .then(user => {
-                res.status(200).send({success: true, user})
-            })
-            .catch((error) => {
-                res.status(500).json({message: error.message})
-            });
+            .then(user =>  res.status(200).json({user}))
+            .catch((error) => res.status(500).json({message: error.message}));
     });
 };
-
-
-//Delete
-exports.destroy = function (req, res) {
-    const {id} = req.params;
-
-    User.forge({id})
-        .fetch({require: true})
-        .then(function (user) {
-            user.destroy()
-                .then(() => res.status(200).json({success: true, data: {message: 'User successfully deleted'}}))
-                .catch((error) => res.status(500).json({success: false, error: {message: error.message}}));
-        })
-        .catch((error) => res.status(500).json({success: false, error: {message: error.message}}));
-}

@@ -13,12 +13,12 @@ module.exports = passport => {
         new JwtStrategy(opts, (jwt_payload, done) => {
             User.findById(jwt_payload.id)
                 .then(user => {
-                    if (user) {
-                        return done(null, user);
-                    }
+                    if (user) return done(null, user);
                     return done(null, false);
                 })
-                .catch(err => console.log(err));
+                .catch(err => {
+                    return done(err, false, {message: 'Server Error'});
+                });
         })
     );
 };

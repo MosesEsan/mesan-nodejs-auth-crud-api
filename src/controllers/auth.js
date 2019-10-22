@@ -1,21 +1,21 @@
 const User = require('../models/user');
-const validation = require('../utils/validation');
 
 // @route POST api/auth/register
 // @desc Register user
 // @access Public
 exports.register = (req, res) => {
     // Form validation
-    let {error, success} = validation(req.body, true);
+    let keys = ['email','username','password','firstName','lastName'];
 
-    // Check validation
+    let {error, success} = validate(req.body, keys);
+
     if (!success) return res.status(400).json({error, message: "Please fill in all required fields."});
 
     // Make sure this account doesn't already exist
     User.findOne({email: req.body.email})
         .then(user => {
 
-            if (user) return res.status(401).json({type:'user-exists', message: 'The email address you have entered is already associated with another account.'});
+            if (user) return res.status(401).json({message: 'The email address you have entered is already associated with another account.'});
 
             // Create and save the user
             const newUser = new User(req.body);
@@ -25,12 +25,10 @@ exports.register = (req, res) => {
                     let message = err.message;
                     if (err.code === 11000) message = "This email address is linked to another account.";
 
-                    return res.status(500).json({message});
+                    res.status(500).json({message});
                 });
         })
-        .catch(err => {
-            return res.status(500).json({success: false, message:err.message});
-        });
+        .catch(err => res.status(500).json({success: false, message:err.message}););
 };
 
 // @route POST api/auth/login
@@ -38,7 +36,8 @@ exports.register = (req, res) => {
 // @access Public
 exports.login = (req, res) => {
     // Form validation
-    let {error, success} = validation(req.body);
+    let keys = ['email', 'password'];
+    let {error, success} = validate(req.body, keys);
 
     // Check validation
     if (!success) return res.status(400).json({error, message: "Please fill in all required fields."});
@@ -53,19 +52,18 @@ exports.login = (req, res) => {
             // Login successful, write token, and send back user
             res.status(200).json({token: user.generateJWT(), user: user});
         })
-        .catch(err => {
-            return res.status(500).json({message:err.message});
-        });
+        .catch(err => res.status(500).json({message:err.message}));
 };
 
-exports.protected = (req, res) => {
-    const {user: {id}} = req;
-    return User.findById(id)
-        .then((user) => {
-            if (!user) {
-                return res.sendStatus(400);
-            }
 
-            return res.json({user: user.toAuthJSON()});
-        });
+const validate  = (keys) => {
+    let error = {};
+    let success = true;
+
+    keys.map((key, idx) => {
+        if (!req.body[key]) {
+            error[key] = `Your ${field.toLowerCase()} is required`;
+            success = false;
+        }
+    });
 };

@@ -10,6 +10,12 @@ const UserSchema = new mongoose.Schema({
         trim: true
     },
 
+    username: {
+        type: String,
+        unique: true,
+        required: 'Your username is required',
+    },
+
     password: {
         type: String,
         required: 'Your password is required',
@@ -28,24 +34,6 @@ const UserSchema = new mongoose.Schema({
         max: 100
     },
 
-    username: {
-        type: String,
-        required: false,
-        max: 100
-    },
-
-    role: {
-        type: String,
-        required: false,
-        max: 100
-    },
-
-    department: {
-        type: String,
-        required: false,
-        max: 100
-    },
-
     bio: {
         type: String,
         required: false,
@@ -57,11 +45,18 @@ const UserSchema = new mongoose.Schema({
         required: false,
         max: 255
     },
+
+    resetPasswordToken: {
+        type: String,
+        required: false
+    },
+
+    resetPasswordExpires: {
+        type: String,
+        required: false
+    }
 }, {timestamps: true});
 
-
-// const [gender, setGender] = useState("");
-// const [dob, setDOB] = useState("");//(dp)
 
 UserSchema.pre('save',  function(next) {
     const user = this;
@@ -90,10 +85,11 @@ UserSchema.methods.generateJWT = function() {
     expirationDate.setDate(today.getDate() + 60);
 
     let payload = {
+        id: this._id,
+        email: this.email,
+        username: this.username,
         firstName: this.firstName,
         lastName: this.lastName,
-        email: this.email,
-        id: this._id
     };
 
     return jwt.sign(payload, process.env.JWT_SECRET, {
