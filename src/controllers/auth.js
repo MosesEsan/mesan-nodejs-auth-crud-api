@@ -1,15 +1,14 @@
 const User = require('../models/user');
+const {validationResult} = require('express-validator');
 
 // @route POST api/auth/register
 // @desc Register user
 // @access Public
 exports.register = (req, res) => {
-    // Form validation
-    let keys = ['email','username','password','firstName','lastName'];
 
-    let {error, success} = validate(req.body, keys);
-
-    if (!success) return res.status(400).json({error, message: "Please fill in all required fields."});
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const error = checkValidation(req);
+    if (error) return res.status(422).json({ error });
 
     // Make sure this account doesn't already exist
     User.findOne({email: req.body.email})
@@ -28,19 +27,18 @@ exports.register = (req, res) => {
                     res.status(500).json({message});
                 });
         })
-        .catch(err => res.status(500).json({success: false, message:err.message}););
+        .catch(err => res.status(500).json({success: false, message:err.message}));
 };
 
 // @route POST api/auth/login
 // @desc Login user and return JWT token
 // @access Public
 exports.login = (req, res) => {
-    // Form validation
-    let keys = ['email', 'password'];
-    let {error, success} = validate(req.body, keys);
 
-    // Check validation
-    if (!success) return res.status(400).json({error, message: "Please fill in all required fields."});
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const error = checkValidation(req);
+    if (error) return res.status(422).json({ error });
+
 
     User.findOne({email: req.body.email})
         .then(user => {
@@ -56,14 +54,14 @@ exports.login = (req, res) => {
 };
 
 
-const validate  = (keys) => {
-    let error = {};
-    let success = true;
+function checkValidation(req){
+    // Finds the validation errors in this request and wraps them in an object with handy functions
+    const errors = validationResult(req);
 
-    keys.map((key, idx) => {
-        if (!req.body[key]) {
-            error[key] = `Your ${field.toLowerCase()} is required`;
-            success = false;
-        }
-    });
-};
+    if (errors.isEmpty()) return null;
+
+    let error = {};
+    errors.array().map((err) => error[err.param] = err.msg);
+
+    return error;
+}
