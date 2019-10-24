@@ -18,7 +18,6 @@ router.post('/register', [
     check('lastName').not().isEmpty().withMessage('You last name is required')
 ], Auth.register);
 
-
 router.post("/login", [
     check('email').isEmail().withMessage('Enter a valid email address'),
     check('password').not().isEmpty(),

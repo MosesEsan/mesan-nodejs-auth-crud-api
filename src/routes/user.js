@@ -1,12 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const multer  = require('multer');
-const upload = multer({ dest: 'uploads/'});
-
-const User = require('../controllers/users');
+const User = require('../controllers/user');
 
 router.route('/').get(User.index);
-router.put('/update', upload.single('profileImage'), User.update);
+router.put('/update', User.update);
+router.post('/upload', User.upload);
 
 module.exports = router;
