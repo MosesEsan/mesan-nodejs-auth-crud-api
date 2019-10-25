@@ -1,0 +1,16 @@
+doctype html
+html
+    head
+        title= title
+        link(rel='stylesheet', href='/stylesheets/style.css')
+    body
+        form(method='POST')
+            legend Reset Password
+            .form-group
+                label(for='password') New Password
+                input.form-control(type='password', name='password', value='', placeholder='New password', autofocus=true)
+            .form-group
+                label(for='confirm') Confirm Password
+                input.form-control(type='password', name='confirmPassword', value='', placeholder='Confirm password')
+            .form-group
+                button.btn.btn-primary(type='submit') Update Password

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const UserSchema = new mongoose.Schema({
     email: {
@@ -44,6 +45,16 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false,
         max: 255
+    },
+
+    resetPasswordToken: {
+        type: String,
+        required: false
+    },
+
+    resetPasswordExpires: {
+        type: Date,
+        required: false
     }
 }, {timestamps: true});
 
@@ -85,6 +96,11 @@ UserSchema.methods.generateJWT = function() {
     return jwt.sign(payload, process.env.JWT_SECRET, {
         expiresIn: parseInt(expirationDate.getTime() / 1000, 10)
     });
+};
+
+UserSchema.methods.generatePasswordReset = function() {
+    this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
+    this.resetPasswordExpires = Date.now() + 3600000; //expires in an hour
 };
 
 module.exports = mongoose.model('Users', UserSchema);

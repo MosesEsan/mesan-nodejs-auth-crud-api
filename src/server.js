@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const passport = require("passport");
+const path = require("path");
 
 // Setting up port
 const connUri = process.env.MONGO_LOCAL_CONN_URL;
@@ -16,6 +17,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
 
 //=== 2 - SET UP DATABASE
 //Configure mongoose's promise to global promise
