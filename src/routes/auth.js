@@ -23,6 +23,12 @@ router.post("/login", [
     check('password').not().isEmpty(),
 ], validate, Auth.login);
 
+
+//EMAIL Verification
+router.get('/verify/:token', Auth.verify);
+router.post('/resend', Auth.resendToken);
+
+//Password RESET
 router.post('/recover', [
     check('email').isEmail().withMessage('Enter a valid email address'),
 ], validate, Auth.recover);
@@ -36,4 +42,3 @@ router.post('/reset/:token', [
 
 
 module.exports = router;
-

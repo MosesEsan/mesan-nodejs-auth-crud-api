@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
+const Token = require('../models/token');
+
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -45,6 +47,11 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: false,
         max: 255
+    },
+
+    isVerified: {
+        type: Boolean,
+        default: false
     },
 
     resetPasswordToken: {
@@ -101,6 +108,15 @@ UserSchema.methods.generateJWT = function() {
 UserSchema.methods.generatePasswordReset = function() {
     this.resetPasswordToken = crypto.randomBytes(20).toString('hex');
     this.resetPasswordExpires = Date.now() + 3600000; //expires in an hour
+};
+
+UserSchema.methods.generateVerificationToken = function() {
+    let payload = {
+        userId: this._id,
+        token: crypto.randomBytes(20).toString('hex')
+    };
+
+    return new Token(payload);
 };
 
 module.exports = mongoose.model('Users', UserSchema);
