@@ -10,15 +10,18 @@ const opts = {
 
 module.exports = passport => {
     passport.use(
-        new JwtStrategy(opts, (jwt_payload, done) => {
-            User.findById(jwt_payload.id)
-                .then(user => {
-                    if (user) return done(null, user);
-                    return done(null, false);
-                })
-                .catch(err => {
-                    return done(err, false, {message: 'Server Error'});
-                });
+        new JwtStrategy(opts, async (jwt_payload, done) => {
+            try {
+                const id = jwt_payload.id;
+                const user = await User.findById(id);
+
+                if (!user) return done(null, false);
+
+                return done(null, user);
+
+            } catch (error) {
+                return done(error, false, {message: 'Server Error'});
+            }
         })
     );
 };

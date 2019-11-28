@@ -62,7 +62,14 @@ const UserSchema = new mongoose.Schema({
     resetPasswordExpires: {
         type: Date,
         required: false
+    },
+
+    role: {
+        type: String,
+        default: 'basic',
+        enum: ["basic", "staff", "writer", "editor"]
     }
+
 }, {timestamps: true});
 
 

@@ -8,7 +8,7 @@ const path = require("path");
 
 // Setting up port
 const connUri = process.env.MONGO_LOCAL_CONN_URL;
-let PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT || 5000;
 
 //=== 1 - CREATE APP
 // Creating express app and configuring middleware needed for authentication
@@ -42,6 +42,15 @@ require("./middlewares/jwt")(passport);
 //=== 4 - CONFIGURE ROUTES
 //Configure Route
 require('./routes/index')(app);
+
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static('../client/build'));
+
+    app.get('*', (req,res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+    })
+}
+
 
 
 //=== 5 - START SERVER
