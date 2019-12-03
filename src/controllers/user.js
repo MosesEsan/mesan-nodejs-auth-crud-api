@@ -26,7 +26,14 @@ exports.update = function (req, res) {
 
     User.findByIdAndUpdate(id, {$set: update}, {new: true})
         .then(user => res.status(200).json({user}))
-        .catch((error) => res.status(500).json({message: error.message}));
+        .catch((error) => {
+            let message = error.message;
+            if (error.code === 11000) message = "This username you have entered is linked to another account.";
+
+            // let x= error.message.split("index:")[1].split("dup key")[0].split("_")[0];
+
+            res.status(500).json({message: error.message})
+        });
 };
 
 
