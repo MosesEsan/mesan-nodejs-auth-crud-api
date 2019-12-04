@@ -65,7 +65,11 @@ exports.show = async function (req, res) {
 exports.update = async function (req, res) {
     try {
         const update = req.body;
-        const id = req.user.id;
+        const id = req.params.id;
+        const user_id = req.user.id;
+
+        //Make sure the passed id is that of the logged in user
+        if (user_id !== id) return res.status(401).json({message: "Sorry, you don't have the permission to update this data."});
 
         const user = await User.findByIdAndUpdate(id, {$set: update}, {new: true});
 
@@ -81,6 +85,10 @@ exports.update = async function (req, res) {
 exports.destroy = async function (req, res) {
     try {
         const id = req.params.id;
+        const user_id = req.user.id;
+
+        //Make sure the passed id is that of the logged in user
+        if (user_id !== id) return res.status(401).json({message: "Sorry, you don't have the permission to delete this data."});
 
         await User.findByIdAndDelete(id);
         res.status(200).json({message: 'User has been deleted'});
