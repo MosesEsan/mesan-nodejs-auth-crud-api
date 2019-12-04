@@ -8,32 +8,27 @@ const cloudinary = require('../config/cloudinary');
 multer_upload = multer().single('profileImage');
 
 //Index
-exports.index = function (req, res, info) {
+exports.index = async (req, res) => {
     const {id} = req.user;
 
-    return User.findById(id)
-        .then((user) => {
-            if (!user) return res.status(400).json({message: "User not found"});
-
-            res.status(200).json({token: user.generateJWT(), user: user});
-        });
+    let user = await User.findById(id);
+    if (!user) return res.status(400).json({message: "User not found"});
+    res.status(200).json({user});
 };
 
-//Update
-exports.update = function (req, res) {
-    const {id} = req.user;
-    let update = {...req.body};
+// @route PUT api/user/
+// @desc Update user details
+// @access Public
+exports.update = async function (req, res) {
+    try {
+        const update = req.body;
+        const id = req.user.id;
 
-    User.findByIdAndUpdate(id, {$set: update}, {new: true})
-        .then(user => res.status(200).json({user}))
-        .catch((error) => {
-            let message = error.message;
-            if (error.code === 11000) message = "This username you have entered is linked to another account.";
-
-            // let x= error.message.split("index:")[1].split("dup key")[0].split("_")[0];
-
-            res.status(500).json({message: error.message})
-        });
+        const user = await User.findByIdAndUpdate(id, {$set: update}, {new: true});
+        res.status(200).json({user, message: 'User has been updated'});
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 };
 
 
