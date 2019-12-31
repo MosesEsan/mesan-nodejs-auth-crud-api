@@ -7,6 +7,7 @@ Email Verification
 **Other Branch** <br/>
 <a href="https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/tree/auth_no_verification" target="_blank">No Email Verification</a>
 
+**Tutorial** <br/>
 Tutorial available <a href="https://medium.com/swlh/how-to-build-a-node-js-authentication-api-with-email-verification-image-upload-and-password-reset-95e35fd46be1" target="_blank">here</a>.
 
 ## Testing
@@ -19,8 +20,8 @@ https://mesannodejsapiwithverification.herokuapp.com/api/user<br/>
 ![User Index](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/UserIndex.gif "User Index")
 
 **Register and Login** <br/>
-Create a POST request to /api/auth/register .
-Create a POST request to /api/auth/login .
+Create a POST request to /api/auth/register <br/>
+Create a POST request to /api/auth/login
 
 **Make sure to enter a valid email address so you can receive the verification email.**<br/>
 
