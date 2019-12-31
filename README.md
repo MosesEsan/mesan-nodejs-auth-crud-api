@@ -1,5 +1,5 @@
-# mesan-nodejs-auth-crud-api
-Node.js Authentication API with Email Verification, Image Upload and Password Reset Using JWT, Passport.js and Sendgrid.
+# Node.js Authentication and CRUD API
+Node.js Authentication and CRUD API with Email Verification, Image Upload and Password Reset Using JWT, Passport.js and Sendgrid.
 
 **This Branch** <br/>
 Email Verification
