@@ -66,7 +66,7 @@ exports.update = async function (req, res) {
     try {
         const update = req.body;
         const id = req.params.id;
-        const user_id = req.user.id;
+        const user_id = req.user._id;
 
         //Make sure the passed id is that of the logged in user
         if (user_id !== id) return res.status(401).json({message: "Sorry, you don't have the permission to update this data."});
@@ -85,7 +85,7 @@ exports.update = async function (req, res) {
 exports.destroy = async function (req, res) {
     try {
         const id = req.params.id;
-        const user_id = req.user.id;
+        const user_id = req.user._id;
 
         //Make sure the passed id is that of the logged in user
         if (user_id !== id) return res.status(401).json({message: "Sorry, you don't have the permission to delete this data."});
