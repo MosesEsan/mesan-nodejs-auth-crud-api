@@ -14,6 +14,8 @@ Use <a href="https://www.getpostman.com" target="_blank">Postman</a> to test.<br
 
 https://mesannodejsapiwithverification.herokuapp.com/api/user<br/>
 
+![User Index](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/UserIndex.gif "User Index")
+
 **Register and Login** <br/>
 Create a POST request to /api/auth/register .
 Create a POST request to /api/auth/login .
@@ -23,21 +25,33 @@ Create a POST request to /api/auth/login .
 https://mesannodejsapiwithverification.herokuapp.com/api/auth/register
 https://mesannodejsapiwithverification.herokuapp.com/api/auth/login
 
+![Register And Login](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/RegisterandLogin.gif "Register And Login")
+
+![Verification Email](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/VerificationEmail.png "Verification Email")
+
 **Update User Info** <br/>
 Try updating the user information using endpoint/api/user/update passing the token.
 
 https://mesannodejsapiwithverification.herokuapp.com/api/user/update
+
+![Update User](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/UpdateUser.gif "Update User")
 
 **Upload Profile Image** <br/>
 Try uploading a profile image using endpoint/api/user/upload passing the token.
 
 https://mesannodejsapiwithverification.herokuapp.com/api/user/upload
 
+![Update Profile Image](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/UpdateProfileImage.gif "Update Profile Image")
+
 **Login and Recover Password** <br/>
 Create a POST request to /api/auth/recover to recover your password. An email will be sent to you.
 
 https://mesannodejsapiwithverification.herokuapp.com/api/auth/recover
 
+![Password Recovery](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/PasswordRecovery.gif "Password Recovery")
+
 **Reset Password and Login with new Password** <br/>
 Click the link in the email to reset your password. 
 Reset the password then attempt to login with your old password. This should fail. Login with your new password
+
+![Password Reset](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/PasswordReset.gif "Password Reset")
