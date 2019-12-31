@@ -7,6 +7,8 @@ Email Verification
 **Other Branch** <br/>
 <a href="https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/tree/auth_no_verification" target="_blank">No Email Verification</a>
 
+Tutorial available <a href="https://medium.com/swlh/how-to-build-a-node-js-authentication-api-with-email-verification-image-upload-and-password-reset-95e35fd46be1" target="_blank">here</a>.
+
 ## Testing
 Use <a href="https://www.getpostman.com" target="_blank">Postman</a> to test.<br/>
 
