@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const passport = require("passport");
 const path = require("path");
+const bodyParser = require('body-parser');
 
 // Setting up port
 const connUri = process.env.MONGO_LOCAL_CONN_URL;
@@ -17,6 +18,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
