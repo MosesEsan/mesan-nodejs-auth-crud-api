@@ -27,9 +27,6 @@ router.put('/:id',  User.update);
 //DELETE
 router.delete('/:id', User.destroy);
 
-//UPLOAD
-router.post('/upload', User.upload);
-
 module.exports = router;
 
 
