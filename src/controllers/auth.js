@@ -4,6 +4,7 @@ const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const Token = require('../models/token');
+const {sendEmail} = require('../utils/index');
 
 // @route POST api/auth/register
 // @desc Register user
@@ -20,13 +21,13 @@ exports.register = async (req, res) => {
         const newUser = new User({ ...req.body, role: "basic" });
 
         const user_ = await newUser.save();
-        sendEmail(user_, req, res);
+
+        await sendVerificationEmail(user_, req, res);
 
     } catch (error) {
         res.status(500).json({success: false, message: error.message})
     }
 };
-
 
 // @route POST api/auth/login
 // @desc Login user and return JWT token
@@ -98,34 +99,30 @@ exports.resendToken = async (req, res) => {
 
         if (user.isVerified) return res.status(400).json({ message: 'This account has already been verified. Please log in.'});
 
-        sendEmail(user, req, res);
+        await sendVerificationEmail(user, req, res);
     } catch (error) {
         res.status(500).json({message: error.message})
     }
 };
 
-function sendEmail(user, req, res){
-    const token = user.generateVerificationToken();
+async function sendVerificationEmail(user, req, res){
+    try{
+        const token = user.generateVerificationToken();
 
-    // Save the verification token
-    token.save(function (err) {
-        if (err) return res.status(500).json({ message: err.message });
+        // Save the verification token
+        await token.save();
 
+        let subject = "Account Verification Token";
+        let to = user.email;
+        let from = process.env.FROM_EMAIL;
         let link="http://"+req.headers.host+"/api/auth/verify/"+token.token;
+        let html = `<p>Hi ${user.username}<p><br><p>Please click on the following <a href="${link}">link</a> to verify your account.</p> 
+                  <br><p>If you did not request this, please ignore this email.</p>`;
 
-        const mailOptions = {
-            to: user.email,
-            from: process.env.FROM_EMAIL,
-            subject: 'Account Verification Token',
-            text: `Hi ${user.username} \n 
-                    Please click on the following link ${link} to verify your account. \n\n 
-                    If you did not request this, please ignore this email.\n`,
-        };
+        await sendEmail({to, from, subject, html});
 
-        sgMail.send(mailOptions, (error, result) => {
-            if (error) return res.status(500).json({ message: error.message });
-
-            res.status(200).json({message: 'A verification email has been sent to ' + user.email + '.'});
-        });
-    });
+        res.status(200).json({message: 'A verification email has been sent to ' + user.email + '.'});
+    }catch (error) {
+        res.status(500).json({message: error.message})
+    }
 }
