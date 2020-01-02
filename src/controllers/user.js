@@ -69,7 +69,7 @@ exports.update = async function (req, res) {
         const user_id = req.user._id;
 
         //Make sure the passed id is that of the logged in user
-        if (user_id.toString() !== id.toString()) return res.status(401).json({message: "Sorry, you don't have the permission to delete this data."});
+        if (user_id.toString() !== id.toString()) return res.status(401).json({message: "Sorry, you don't have the permission to upd this data."});
 
         const user = await User.findByIdAndUpdate(id, {$set: update}, {new: true});
 
