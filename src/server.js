@@ -16,9 +16,12 @@ let PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors());
+
+// for parsing application/json
 app.use(express.json());
+
+// for parsing application/xwww-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
