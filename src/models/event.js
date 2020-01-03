@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const mongoosePaginate = require('mongoose-paginate-v2');
+const aggregatePaginate = require('mongoose-aggregate-paginate-v2');
 
 const EventSchema = new mongoose.Schema({
     userId: {
@@ -46,6 +46,6 @@ const EventSchema = new mongoose.Schema({
 }, {timestamps: true});
 
 
-EventSchema.plugin(mongoosePaginate);
+EventSchema.plugin(aggregatePaginate);
 
 module.exports = mongoose.model('Events', EventSchema);
