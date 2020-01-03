@@ -1,12 +1,5 @@
-const multer = require('multer');
-const sgMail = require('@sendgrid/mail');
-
 const User = require('../models/user');
 const {uploader, sendEmail} = require('../utils/index');
-
-const upload = multer().single('profileImage');
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // @route GET admin/user
 // @desc Returns all users
@@ -78,32 +71,28 @@ exports.show = async function (req, res) {
 // @desc Update user details
 // @access Public
 exports.update = async function (req, res) {
-    upload(req, res, async (err) => {
-        if (err) return res.status(500).json({message: err.message});
+    try {
+        const update = req.body;
+        const id = req.params.id;
+        const userId = req.user._id;
 
-        try {
-            const update = req.body;
-            const id = req.params.id;
-            const userId = req.user._id;
+        //Make sure the passed id is that of the logged in user
+        if (userId.toString() !== id.toString()) return res.status(401).json({message: "Sorry, you don't have the permission to upd this data."});
 
-            //Make sure the passed id is that of the logged in user
-            if (userId.toString() !== id.toString()) return res.status(401).json({message: "Sorry, you don't have the permission to upd this data."});
+        const user = await User.findByIdAndUpdate(id, {$set: update}, {new: true});
 
-            const user = await User.findByIdAndUpdate(id, {$set: update}, {new: true});
+        //if there is no image, return success message
+        if (!req.file) return res.status(200).json({user, message: 'User has been updated'});
 
-            //if there is no image, return success message
-            if (!req.file) return res.status(200).json({user, message: 'User has been updated'});
+        //Attempt to upload to cloudinary
+        const result = await uploader(req);
+        const user_ = await User.findByIdAndUpdate(id, {$set: update}, {$set: {profileImage: result.url}}, {new: true});
 
-            //Attempt to upload to cloudinary
-            const result = await uploader(req);
-            const user_ = await User.findByIdAndUpdate(id, {$set: update}, {$set: {profileImage: result.url}}, {new: true});
+        if (!req.file) return res.status(200).json({user: user_, message: 'User has been updated'});
 
-            if (!req.file) return res.status(200).json({user: user_, message: 'User has been updated'});
-
-        } catch (error) {
-            res.status(500).json({message: error.message});
-        }
-    });
+    } catch (error) {
+        res.status(500).json({message: error.message});
+    }
 };
 
 // @route DESTROY api/user/{id}
