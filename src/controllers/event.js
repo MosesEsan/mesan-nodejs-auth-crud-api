@@ -9,6 +9,7 @@ const limit = 5;
 exports.index = async function (req, res) {
     let page = parseInt(req.query.page) || 1;
 
+    //set the options for pagination
     const options = {
         page, limit,
         collation: {locale: 'en'},
@@ -20,10 +21,38 @@ exports.index = async function (req, res) {
         }
     };
 
-    const result = await Event.paginate({}, options);
+    //Set up the grouping
+    const myAggregate = Event.aggregate([
+        {
+            $group: {
+                _id: {
+                    $dateToString: { format: "%Y-%m-%d", date: "$start_time" }
+                },
+                data: {
+                    $push: {
+                        userId: '$userId',
+                        name: '$name',
+                        location: '$location',
+                        address: '$address',
+                        start_time: '$start_time',
+                        end_time: '$end_time',
+                        description: '$description',
+                        image: '$image',
+                        _id: '$_id'
+                    }
+                }
+            },
+
+        },
+        {$project: {date: '$_id', data: 1, _id: 0}},
+        {$sort: {"date": 1} } // and this will sort based on your date
+    ]);
+
+    const result = await Event.aggregatePaginate(myAggregate, options);
 
     res.status(200).json(result);
 };
+
 
 // @route POST api/event
 // @desc Add a new event
@@ -42,7 +71,7 @@ exports.store = async (req, res) => {
         const result = await uploader(req);
         const event_ = await Event.findByIdAndUpdate(event._id, {$set: {image: result.url}}, {new: true});
 
-        res.status(200).json({event:event_, message: 'Event added successfully'});
+        res.status(200).json({event: event_, message: 'Event added successfully'});
     } catch (error) {
         res.status(500).json({message: error.message});
     }
@@ -74,16 +103,16 @@ exports.update = async function (req, res) {
         const id = req.params.id;
         const userId = req.user._id;
 
-        const event = await Event.findOneAndUpdate({ _id: id, userId}, {$set: update}, {new: true});
+        const event = await Event.findOneAndUpdate({_id: id, userId}, {$set: update}, {new: true});
 
         //if there is no image, return success message
         if (!req.file) return res.status(200).json({event, message: 'Event has been updated'});
 
         //Attemt to upload to cloudinary
         const result = await uploader(req);
-        const event_ = await Event.findOneAndUpdate({ _id: id, userId}, {$set: {image: result.url}}, {new: true});
+        const event_ = await Event.findOneAndUpdate({_id: id, userId}, {$set: {image: result.url}}, {new: true});
 
-        res.status(200).json({event:event_, message: 'Event has been updated'});
+        res.status(200).json({event: event_, message: 'Event has been updated'});
     } catch (error) {
         res.status(500).json({message: error.message});
     }
@@ -97,7 +126,7 @@ exports.destroy = async function (req, res) {
         const id = req.params.id;
         const userId = req.user._id;
 
-        await Event.findOneAndDelete({ _id: id, userId});
+        await Event.findOneAndDelete({_id: id, userId});
 
         res.status(200).json({message: 'Event has been deleted'});
     } catch (error) {
