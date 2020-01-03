@@ -1,8 +1,4 @@
 const User = require('../models/user');
-
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 const {sendEmail} = require('../utils/index');
 
 // @route POST api/auth/recover
