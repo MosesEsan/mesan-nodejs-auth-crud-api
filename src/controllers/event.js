@@ -7,7 +7,17 @@ const limit = 5;
 // @desc Returns all events with pagination
 // @access Public
 exports.index = async function (req, res) {
+    //pagination
     let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || limit;
+
+    //sorting
+    let sortOrder = req.query.sort_order && req.query.sort_order === 'desc' ? -1 : 1;
+
+    //Filtering and Partial text search
+    let match = {};
+    if (req.query.name) match.name = { $regex: '.*' + req.query.name + '.*', $options: 'i'}; //filter by name - use $regex in mongodb - add the 'i' flag if you want the search to be case insensitive.
+    if (req.query.date) match.date = {$eq: new Date(req.query.date)}; //filter by date
 
     //set the options for pagination
     const options = {
@@ -15,18 +25,16 @@ exports.index = async function (req, res) {
         collation: {locale: 'en'},
         customLabels: {
             totalDocs: 'totalResults',
-            docs: 'events',
-            limit: 'pageSize',
-            page: 'currentPage'
+            docs: 'events'
         }
     };
 
-    //Set up the grouping
+    //Set up the grouping and sorting
     const myAggregate = Event.aggregate([
         {
             $group: {
                 _id: {
-                    $dateToString: { format: "%Y-%m-%d", date: "$start_time" }
+                    $dateToString: {format: "%Y-%m-%d", date: "$start_time"}
                 },
                 data: {
                     $push: {
@@ -42,10 +50,18 @@ exports.index = async function (req, res) {
                     }
                 }
             },
-
+        },
+        {$sort: {"date": sortOrder}}, // and this will sort based on the date
+        {$match: match},
+        {
+            $lookup: {
+                from: 'comments',
+                localField: "_id",
+                foreignField: "eventId",
+                as: "comments"
+            }
         },
         {$project: {date: '$_id', data: 1, _id: 0}},
-        {$sort: {"date": 1} } // and this will sort based on your date
     ]);
 
     const result = await Event.aggregatePaginate(myAggregate, options);
@@ -108,7 +124,7 @@ exports.update = async function (req, res) {
         //if there is no image, return success message
         if (!req.file) return res.status(200).json({event, message: 'Event has been updated'});
 
-        //Attemt to upload to cloudinary
+        //Attempt to upload to cloudinary
         const result = await uploader(req);
         const event_ = await Event.findOneAndUpdate({_id: id, userId}, {$set: {image: result.url}}, {new: true});
 
