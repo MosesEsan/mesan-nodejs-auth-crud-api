@@ -1,7 +1,7 @@
 const Event = require('../models/event');
 const {uploader} = require('../utils/index');
 
-const limit = 5;
+const limit_ = 5;
 
 // @route GET api/event
 // @desc Returns all events with pagination
@@ -9,15 +9,16 @@ const limit = 5;
 exports.index = async function (req, res) {
     //pagination
     let page = parseInt(req.query.page) || 1;
-    let limit = parseInt(req.query.limit) || limit;
+    let limit = parseInt(req.query.limit) || limit_;
 
     //sorting
     let sortOrder = req.query.sort_order && req.query.sort_order === 'desc' ? -1 : 1;
 
     //Filtering and Partial text search
     let match = {};
-    if (req.query.name) match.name = { $regex: '.*' + req.query.name + '.*', $options: 'i'}; //filter by name - use $regex in mongodb - add the 'i' flag if you want the search to be case insensitive.
-    if (req.query.date) match.date = {$eq: new Date(req.query.date)}; //filter by date
+    if (req.query.name) match.name = { $regex:req.query.name, $options: 'i'}; //filter by name - use $regex in mongodb - add the 'i' flag if you want the search to be case insensitive.
+    if (req.query.date) match.start_time = {$eq: new Date(req.query.date)}; //filter by date
+    // { $gte: new ISODate("2014-01-01"), $lt: new ISODate("2015-01-01") }
 
     //set the options for pagination
     const options = {
@@ -31,11 +32,13 @@ exports.index = async function (req, res) {
 
     //Set up the grouping and sorting
     const myAggregate = Event.aggregate([
+        // First Stage
+        {$match : match},
+        // Second Stage
         {
-            $group: {
-                _id: {
-                    $dateToString: {format: "%Y-%m-%d", date: "$start_time"}
-                },
+            $group : {
+                _id : { $dateToString: { format: "%Y-%m-%d", date: "$start_time" } }, // Group By Expression
+
                 data: {
                     $push: {
                         userId: '$userId',
@@ -49,19 +52,21 @@ exports.index = async function (req, res) {
                         _id: '$_id'
                     }
                 }
-            },
-        },
-        {$sort: {"date": sortOrder}}, // and this will sort based on the date
-        {$match: match},
-        {
-            $lookup: {
-                from: 'comments',
-                localField: "_id",
-                foreignField: "eventId",
-                as: "comments"
             }
         },
-        {$project: {date: '$_id', data: 1, _id: 0}},
+        // Third Stage
+        {
+            $sort : {"data.start_time": sortOrder}
+        },
+        // Fourth Stage
+        // {
+        //     $lookup: {
+        //         from: 'comments',
+        //         localField: "_id",
+        //         foreignField: "eventId",
+        //         as: "comments"
+        //     }
+        // },
     ]);
 
     const result = await Event.aggregatePaginate(myAggregate, options);
