@@ -29,6 +29,9 @@ router.put('/:id', upload, Event.update);
 //DELETE
 router.delete('/:id', Event.destroy);
 
+//SEED
+router.get('/seed', Event.seed);
+
 module.exports = router;
 
 

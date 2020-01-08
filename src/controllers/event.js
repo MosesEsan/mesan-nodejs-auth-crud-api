@@ -1,3 +1,5 @@
+const faker = require('faker'); //For testing purpose only
+
 const Event = require('../models/event');
 const {uploader} = require('../utils/index');
 
@@ -16,8 +18,8 @@ exports.index = async function (req, res) {
 
     //Filtering and Partial text search
     let match = {};
-    if (req.query.name) match.name = { $regex:req.query.name, $options: 'i'}; //filter by name - use $regex in mongodb - add the 'i' flag if you want the search to be case insensitive.
-    if (req.query.date) match.start_time = {$eq: new Date(req.query.date)}; //filter by date
+    if (req.query.name) match.name = {$regex: req.query.name, $options: 'i'}; //filter by name - use $regex in mongodb - add the 'i' flag if you want the search to be case insensitive.
+    if (req.query.date) match.start_date = {$eq: new Date(req.query.date)}; //filter by date
     // { $gte: new ISODate("2014-01-01"), $lt: new ISODate("2015-01-01") }
 
     //set the options for pagination
@@ -33,11 +35,11 @@ exports.index = async function (req, res) {
     //Set up the grouping and sorting
     const myAggregate = Event.aggregate([
         // First Stage
-        {$match : match},
+        {$match: match},
         // Second Stage
         {
-            $group : {
-                _id : { $dateToString: { format: "%Y-%m-%d", date: "$start_time" } }, // Group By Expression
+            $group: {
+                _id: {$dateToString: {format: "%Y-%m-%d", date: "$start_date"}}, // Group By Expression
 
                 data: {
                     $push: {
@@ -45,7 +47,9 @@ exports.index = async function (req, res) {
                         name: '$name',
                         location: '$location',
                         address: '$address',
+                        start_date: '$start_date',
                         start_time: '$start_time',
+                        end_date: '$end_date',
                         end_time: '$end_time',
                         description: '$description',
                         image: '$image',
@@ -56,7 +60,7 @@ exports.index = async function (req, res) {
         },
         // Third Stage
         {
-            $sort : {"data.start_time": sortOrder}
+            $sort: {"data.start_date": sortOrder}
         },
         // Fourth Stage
         // {
@@ -153,4 +157,32 @@ exports.destroy = async function (req, res) {
     } catch (error) {
         res.status(500).json({message: error.message});
     }
+};
+
+
+/**
+ * Seed the database -  //For testing purpose only
+ */
+exports.seed = async function (req, res) {
+    const userId = req.user._id;
+
+    for (let i = 0; i < 20; i++) {
+        let event = {
+            name: faker.lorem.word(),
+            location: faker.address.streetName(),
+            address: `${faker.address.streetAddress()} ${faker.address.secondaryAddress()}`,
+            start_date: faker.date.future(),
+            start_time: faker.date.future(),
+            end_date: faker.date.future(),
+            description: faker.lorem.text(),
+            image: faker.image.nightlife(),
+            userId:userId
+        };
+
+        const newEvent = new Event(event);
+        newEvent.save();
+    }
+
+    // seeded!
+    res.send('Database seeded!');
 };
