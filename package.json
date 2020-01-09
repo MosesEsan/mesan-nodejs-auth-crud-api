@@ -21,6 +21,7 @@
     "errorhandler": "^1.5.1",
     "express": "^4.17.1",
     "express-validator": "^6.2.0",
+    "faker": "^4.1.0",
     "jade": "^1.11.0",
     "jsonwebtoken": "^8.5.1",
     "moment": "^2.24.0",

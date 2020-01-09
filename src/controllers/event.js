@@ -1,5 +1,7 @@
 const faker = require('faker'); //For testing purpose only
+const moment = require('moment'); //For testing purpose only
 
+const User = require('../models/user');
 const Event = require('../models/event');
 const {uploader} = require('../utils/index');
 
@@ -164,23 +166,38 @@ exports.destroy = async function (req, res) {
  * Seed the database -  //For testing purpose only
  */
 exports.seed = async function (req, res) {
-    const userId = req.user._id;
+    for (let i = 0; i < 5; i++) {
+        const password = '_' + Math.random().toString(36).substr(2, 9); //generate a random password
+        let newUser = new User({
+            email: faker.internet.email(),
+            password,
+            firstName: faker.name.firstName(),
+            lastName: `${faker.name.lastName()}`,
+            isVerified:true
+        });
 
-    for (let i = 0; i < 20; i++) {
-        let event = {
-            name: faker.lorem.word(),
-            location: faker.address.streetName(),
-            address: `${faker.address.streetAddress()} ${faker.address.secondaryAddress()}`,
-            start_date: faker.date.future(),
-            start_time: faker.date.future(),
-            end_date: faker.date.future(),
-            description: faker.lorem.text(),
-            image: faker.image.nightlife(),
-            userId:userId
-        };
+        const user = await newUser.save();
 
-        const newEvent = new Event(event);
-        newEvent.save();
+        //Create 5 events for each user
+        for (let j = 0; j < 5; j++) {
+            let start_date_time = faker.date.future();
+            let start_date = moment.utc(start_date_time).format("YYYY-MM-DD");
+            let start_time = moment.utc(start_date_time).format("HH:mm");
+
+            let event = {
+                name: faker.lorem.word(),
+                location: faker.address.streetName(),
+                address: `${faker.address.streetAddress()} ${faker.address.secondaryAddress()}`,
+                start_date, start_time,
+                end_date: faker.date.future(),
+                description: faker.lorem.text(),
+                image: faker.image.nightlife(),
+                userId:user._id
+            };
+
+            const newEvent = new Event(event);
+            newEvent.save();
+        }
     }
 
     // seeded!
