@@ -18,7 +18,6 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         required: false,
         index: true,
-        default: null,
         sparse: true
     },
 
