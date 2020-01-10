@@ -19,7 +19,7 @@ router.get('/', Event.index);
 router.post('/', upload, [
     check('name').not().isEmpty().withMessage('Event name is required'),
     check('location').not().isEmpty().withMessage('Event location is required'),
-    check('start_time').not().isEmpty().withMessage('Event start time is required'),
+    check('start_date').not().isEmpty().withMessage('Event start date and time is required'),
     check('description').not().isEmpty().withMessage('Event description is required')
 ], validate, Event.store);
 
@@ -33,5 +33,3 @@ router.put('/:id', upload, Event.update);
 router.delete('/:id', Event.destroy);
 
 module.exports = router;
-
-
