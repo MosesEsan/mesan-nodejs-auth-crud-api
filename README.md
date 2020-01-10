@@ -32,19 +32,10 @@ https://mesannodejsapiwithverification.herokuapp.com/api/auth/login
 
 ![Verification Email](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/VerificationEmail.png "Verification Email")
 
-**Update User Info** <br/>
-Try updating the user information using endpoint/api/user/update passing the token.
+**Update User Info and Upload Profile Image** <br/>
+Try updating the user information and uploading a profile image using endpoint/api/user/[your_user_id] passing the token.
 
-https://mesannodejsapiwithverification.herokuapp.com/api/user/update
-
-![Update User](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/UpdateUser.gif "Update User")
-
-**Upload Profile Image** <br/>
-Try uploading a profile image using endpoint/api/user/upload passing the token.
-
-https://mesannodejsapiwithverification.herokuapp.com/api/user/upload
-
-![Update Profile Image](https://github.com/MosesEsan/mesan-nodejs-auth-crud-api/blob/master/demo/UpdateProfileImage.gif "Update Profile Image")
+https://mesannodejsapiwithverification.herokuapp.com/api/user/[user_id]
 
 **Login and Recover Password** <br/>
 Create a POST request to /api/auth/recover to recover your password. An email will be sent to you.
