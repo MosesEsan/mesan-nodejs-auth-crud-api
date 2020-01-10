@@ -29,36 +29,33 @@ exports.index = async function (req, res) {
 
     //FILTERING AND PARTIAL TEXT SEARCH -- FIRST STAGE
     let match = {};
-    if (req.query.q) match.name = {$regex: req.query.q, $options: 'i'}; //filter by name - use $regex in mongodb - add the 'i' flag if you want the search to be case insensitive.
-    if (req.query.date) match.start_date = {$eq: new Date(req.query.date)}; //filter by date
-    aggregate_options.push({$match: match});
 
+    //filter by name - use $regex in mongodb - add the 'i' flag if you want the search to be case insensitive.
+    if (req.query.q) match.name = {$regex: req.query.q, $options: 'i'};
+
+    //filter by date
+    if (req.query.date) {
+        let d = moment(req.query.date);
+        let next_day = moment(d).add(1, 'days'); // add 1 day
+
+        match.start_date = {$gte: new Date(d), $lt: new Date(next_day)};
+    }
+
+    aggregate_options.push({$match: match});
 
     //GROUPING -- SECOND STAGE
     if (req.query.group !== 'false' && parseInt(req.query.group) !== 0) {
         let group = {
             _id: {$dateToString: {format: "%Y-%m-%d", date: "$start_date"}}, // Group By Expression
-            data: {
-                $push: {
-                    userId: '$userId',
-                    name: '$name',
-                    location: '$location',
-                    address: '$address',
-                    start_date: '$start_date',
-                    end_date: '$end_date',
-                    end_time: '$end_time',
-                    description: '$description',
-                    image: '$image',
-                    _id: '$_id'
-                }
-            }
+            data: {$push: "$$ROOT"}
         };
+
         aggregate_options.push({$group: group});
     }
 
     //SORTING -- THIRD STAGE
     let sortOrder = req.query.sort_order && req.query.sort_order === 'desc' ? -1 : 1;
-    aggregate_options.push({$sort: {"start_date": sortOrder}});
+    aggregate_options.push({$sort: {"data.start_date": sortOrder}});
 
     //LOOKUP/JOIN -- FOURTH STAGE
     // aggregate_options.push({$lookup: {from: 'interested', localField: "_id", foreignField: "eventId", as: "interested"}});
@@ -180,15 +177,11 @@ exports.seed = async function (req, res) {
         for (let i = 0; i < ids.length; i++) {
             //Create 5 events for each user
             for (let j = 0; j < 5; j++) {
-                let start_date_time = faker.date.future();
-                let start_date = moment.utc(start_date_time).format("YYYY-MM-DD");
-
                 const newEvent = new Event({
                     name: faker.lorem.word(),
                     location: faker.address.streetName(),
                     address: `${faker.address.streetAddress()} ${faker.address.secondaryAddress()}`,
-                    start_date,
-                    end_date: faker.date.future(),
+                    start_date: faker.date.future(),
                     description: faker.lorem.text(),
                     image: faker.image.nightlife(),
                     userId: ids[i]
